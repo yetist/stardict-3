@@ -172,7 +172,7 @@ bool HttpClient::SendRequest()
 		request += host_;
 	}
 	request += file_;
-	request += " HTTP/1.1\r\n";
+	request += " HTTP/1.0\r\n";
 
 	request += "User-Agent: Mozilla/4.0(compatible;MSIE 5.00;Windows 98)\r\n";
 	request += "Accept: */*\r\n";

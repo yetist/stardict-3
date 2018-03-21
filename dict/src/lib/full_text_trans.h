@@ -25,6 +25,7 @@
 #include "httpmanager.h"
 
 enum TranslateEngineCode {
+	TranslateEngine_Baidu,
 	TranslateEngine_Google,
 	TranslateEngine_Yahoo,
 	// TranslateEngine_Altavista,
@@ -112,6 +113,7 @@ private:
 	void on_http_client_error(HttpClient* http_client, const char *error_msg);
 	void on_http_client_response(HttpClient* http_client);
 	void parse_response(const char* buffer, size_t buffer_len, glong engine_index);
+	gchar* parse_baidu_json(const gchar *data, gssize len);
 	// calculate size of a NULL-terminated array
 	static size_t calculate_cnt(const char** arr);
 	static size_t calculate_cnt(const TransLanguageInt* arr);

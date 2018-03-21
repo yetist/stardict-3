@@ -2108,6 +2108,10 @@ msgid "Chinese (Traditional)"
 msgstr "繁体中文"
 
 #. name,                         srclangs,            tgtlangs,            tgtlangs2,        website_name,   website_url
+#: ../src/lib/full_text_trans.cpp:415
+msgid "Baidu Translate"
+msgstr "百度翻译"
+
 #: ../src/lib/full_text_trans.cpp:416
 msgid "Google Translate"
 msgstr "谷歌翻译"

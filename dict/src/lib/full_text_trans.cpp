@@ -23,6 +23,7 @@
 
 #include <glib/gi18n.h>
 #include <algorithm>
+#include <json-glib/json-glib.h>
 
 #include "collation.h"
 #include "full_text_trans.h"
@@ -42,6 +43,18 @@ struct TransEngineInt {
 	const TransLanguageInt* tgtlangs2;
 	const char * website_name;
 	const char * website_url;
+};
+
+static const TransLanguageInt baidu_srclangs[] = {
+	{ N_("English"), "en"},
+	{ N_("Chinese"), "zh"},
+	{ NULL, NULL }
+};
+
+static const TransLanguageInt baidu_tgtlangs[] = {
+	{ N_("Chinese"), "zh"},
+	{ N_("English"), "en"},
+	{ NULL, NULL }
 };
 
 static const TransLanguageInt google_srclangs[] = {
@@ -413,6 +426,7 @@ static const char **kingsoft_tolangs[] = {kingsoft_english_tolangs, kingsoft_chi
 /* keep in sync with enum TranslateEngineCode! */
 TransEngineInt trans_engines[] = {
 	// name,                         srclangs,            tgtlangs,            tgtlangs2,        website_name,   website_url
+	{ N_("Baidu Translate"),         baidu_srclangs,      NULL,                baidu_tgtlangs,   "Baidu",       "http://fanyi.baidu.com"},
 	{ N_("Google Translate"),        google_srclangs,     NULL,                google_tgtlangs,  "Google",       "http://translate.google.com"},
 	{ N_("Yahoo Translate"),         yahoo_srclangs,      yahoo_tgtlangs,      NULL,             "Yahoo",        "http://babelfish.yahoo.com"},
 	{ N_("Excite Japan Translate"),  excite_srclangs,     excite_tgtlangs,     NULL,             "Excite Japan", "http://www.excite.co.jp"},
@@ -498,7 +512,13 @@ void FullTextTrans::build_request(
 {
 	headers.clear();
 	body.clear();
-	if(engine_index==TranslateEngine_Google){
+	if(engine_index==TranslateEngine_Baidu){
+		httpMethod = HTTP_METHOD_POST;
+		host = "fanyi.baidu.com";
+		file = "/transapi";
+		allow_absolute_URI = true;
+		headers += "Content-Type: application/x-www-form-urlencoded\r\n";
+	} else if(engine_index==TranslateEngine_Google){
 		httpMethod = HTTP_METHOD_GET;
 		host = "translate.google.com";
 		file = "/translate_t?ie=UTF-8";
@@ -524,7 +544,15 @@ void FullTextTrans::build_request(
 		file = "/?langpair=";
 	} */
 
-	if(engine_index==TranslateEngine_Google) {
+	if(engine_index==TranslateEngine_Baidu){
+		const size_t tolangind = engines[engine_index].srclangs[fromlang_index].tolangind;
+		body += "from=";
+		body += engines[engine_index].srclangs[fromlang_index].code;
+		body += "&to=";
+		body += engines[engine_index].tgtlangs[tolangind][tolang_index].code;
+		body += "&query=";
+	        body += text;
+	} else if(engine_index==TranslateEngine_Google) {
 		file += "&sl=";
 		file += engines[engine_index].srclangs[fromlang_index].code;
 		file += "&tl=";
@@ -642,11 +670,55 @@ void FullTextTrans::on_http_client_response(HttpClient* http_client)
 	oHttpManager.Remove(http_client);
 }
 
+gchar* FullTextTrans::parse_baidu_json(const gchar *data, gssize len)
+{
+	JsonParser *parser;
+	JsonNode *root;
+	GError *error = NULL;
+	gchar *text = NULL;
+
+	parser = json_parser_new ();
+	if (!json_parser_load_from_data (parser, data, len, &error)) {
+		g_error_free(error);
+	} else {
+		JsonArray *array;
+		root = json_parser_get_root (parser);
+		JsonNode *node = json_path_query ("$['data'][*]['dst']", root, NULL);
+		if ((array = json_node_get_array(node)) != NULL ){
+			int i = 0;
+			GString *line = g_string_new (NULL);
+			while (i < json_array_get_length (array)) {
+				if ( i > 0) {
+					line = g_string_append(line, "\n\n");
+				}
+				line = g_string_append(line, json_array_get_string_element(array, i));
+				i++;
+			}
+			text = g_string_free(line, FALSE);
+		}
+	}
+	g_object_unref(parser);
+	return text;
+}
+
 void FullTextTrans::parse_response(const char* buffer, size_t buffer_len, glong engine_index)
 {
 	bool found = false;
 	std::string result_text;
-	if (engine_index == TranslateEngine_ExciteJapan) {
+	gchar *p = g_strstr_len(buffer, buffer_len, "\r\n\r\n");
+	gchar *body = p + 4;
+	size_t body_len = strlen(body);
+
+	printf("body=[%s]\n", body);
+	if (engine_index == TranslateEngine_Baidu) {
+		gchar* text = NULL;
+		text = parse_baidu_json(body, body_len);
+		if (text != NULL) {
+			result_text = text;
+			found = true;
+			g_free(text);
+		}
+	} else if (engine_index == TranslateEngine_ExciteJapan) {
 		#define ExicuteTranslateStartMark "name=\"after\""
 		char *p_E = g_strstr_len(buffer, buffer_len, ExicuteTranslateStartMark);
 		if(p_E){
