@@ -83,6 +83,7 @@
 #include "cmdlineopts.h"
 
 #include "stardict.h"
+#include "stardict-server.h"
 
 AppCore *gpAppFrame;
 
@@ -2114,6 +2115,7 @@ void AppCore::Quit()
 #ifdef CONFIG_GNOME
 	bonobo_object_unref (stardict_app_server);
 #endif
+	stardict_server_free();
 	unlock_keys.reset(0);
 	conf.reset(0);
 	gtk_main_quit();
@@ -2437,6 +2439,9 @@ int main(int argc,char **argv)
 	}
 	*/
 #endif // #ifndef CONFIG_GNOME
+	if (! stardict_server_new()) {
+		exit(0);
+	}
 	g_debug(_("Loading StarDict configuration..."));
 	conf.reset(new AppConf);
 	g_debug(_("StarDict configuration loaded."));
