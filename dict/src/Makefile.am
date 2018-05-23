@@ -55,6 +55,8 @@ STARIDCT_APP_SERVER = \
 	stardict-application-server.cpp stardict-application-server.h
 endif
 
+stardict_built_sources = stardict-dbus-generated.h stardict-dbus-generated.c
+
 if !DARWIN_SUPPORT
 KEYPRESS_FILE_MODULE = x11_iskeyspressed.cpp x11_iskeyspressed.h
 DOCKLET_FILE_MODULE = docklet.cpp docklet.h
@@ -94,7 +96,17 @@ stardict_SOURCES = 			                \
 	hotkeyeditor.c hotkeyeditor.h	\
 	desktop.cpp desktop.h	\
 	log.cpp log.h \
+	stardict-server.h \
+	stardict-server.cpp \
+	$(stardict_built_sources) \
 	cmdlineopts.cpp cmdlineopts.h
+
+$(stardict_built_sources) : Makefile.am $(srcdir)/org.stardict.xml
+	$(AM_V_GEN) gdbus-codegen \
+		--interface-prefix org.stardict. \
+		--c-namespace StarDict \
+		--generate-c-code stardict-dbus-generated \
+		$(srcdir)/org.stardict.xml
 
 if GNOME_SUPPORT
 $(IDL_SOURCES): $(IDL_FILE)
