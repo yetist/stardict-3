@@ -43,12 +43,6 @@
 #  include <libgnome/libgnome.h>
 #endif
 
-#ifdef CONFIG_GNOME
-#  include <bonobo/bonobo-main.h>
-#  include "stardict-application-server.h"
-#  include "GNOME_Stardict.h"
-#endif
-
 #ifdef CONFIG_GPE
 #  include <gpe/init.h>
 #endif
@@ -2071,11 +2065,6 @@ void AppCore::Init(const gchar *queryword)
 
 	Create(queryword);
 
-#ifdef CONFIG_GNOME
-  stardict_app_server =
-    stardict_application_server_new(gdk_screen_get_default());
-#endif
-
 	stardict_splash.on_mainwin_finish();
 	oStarDictPlugins->MiscPlugins.on_mainwin_finish();
 	gtk_main();
@@ -2094,9 +2083,6 @@ void AppCore::Quit()
 
 	End();
 
-#ifdef CONFIG_GNOME
-	bonobo_object_unref (stardict_app_server);
-#endif
 	stardict_server_free();
 	unlock_keys.reset(0);
 	conf.reset(0);
@@ -2196,89 +2182,6 @@ gboolean stardict_on_enter_notify(GtkWidget *widget, GdkEventCrossing *event, gp
 	return FALSE;
 }
 
-#ifdef CONFIG_GNOME
-static void
-stardict_handle_automation_cmdline (const gchar *queryword)
-{
-	CORBA_Environment env;
-	GNOME_Stardict_Application server;
-
-	CORBA_exception_init (&env);
-	CORBA_char id[] = "OAFIID:GNOME_Stardict_Application";
-
-	server = bonobo_activation_activate_from_id (id, 0, NULL, &env);
-	if (!server) {
-		gdk_notify_startup_complete ();
-		return;
-	}
-	//g_return_if_fail (server != NULL);
-
-	if (CmdLineOptions::get_quit()) {
-		GNOME_Stardict_Application_quit (server, &env);
-	}
-	else {
-		if (queryword) {
-			GNOME_Stardict_Application_queryWord (server, queryword, &env);
-		}
-		if (CmdLineOptions::get_hide()) {
-			GNOME_Stardict_Application_hide (server, &env);
-		} else {
-			GNOME_Stardict_Application_grabFocus (server, &env);
-			g_message(_("StarDict is already running. Using the running process."));
-		}
-	}
-
-
-	bonobo_object_release_unref (server, &env);
-	CORBA_exception_free (&env);
-
-
-	/* we never popup a window, so tell startup-notification that
-	 * we're done */
-	gdk_notify_startup_complete ();
-}
-
-/*
-static void client_die_cb (GnomeClient *client, gpointer client_data)
-{
-	gpAppFrame->Quit();
-}
-
-static gboolean save_yourself_cb (GnomeClient       *client,
-                              gint               phase,
-                              GnomeRestartStyle  save_style,
-                              gint               shutdown,
-                              GnomeInteractStyle interact_style,
-                              gint               fast,
-                              gpointer           client_data)
-{
-    gchar *argv[] = {NULL, NULL, NULL};
-	gchar *word = NULL;
-    gint argc = 1;
-
-    argv[0] = (gchar *)client_data;
-
-	if (gpAppFrame->window) {
-		if (!gtk_widget_get_visible(GTK_WIDGET(gpAppFrame->window)))
-			argv[argc++] = (gchar *)"-h";
-	}
-
-	const gchar *text = gpAppFrame->oTopWin.get_text();
-    	if (text[0]) {
-		word = g_strdup(text);
-        	argv[argc++] = word;
-	}
-
-    gnome_client_set_restart_command(client, argc, argv);
-    gnome_client_set_clone_command(client, argc, argv);
-	if (word)
-		g_free(word);
-
-    return true;
-}
-*/
-#endif
-
 #if defined(_WIN32) && defined(_MSC_VER)
 /* Synchronize environment variables in CRTs.
 See section "Two copies of CRT" in doc/README_windows.txt for more details. */
@@ -2353,16 +2256,6 @@ int main(int argc,char **argv)
 		return EXIT_FAILURE;
 	}
 	g_option_context_free(context);
-#else // #ifndef CONFIG_GNOME
-	//GnomeProgram *program;
-	gnome_program_init ("stardict", VERSION,
-			    LIBGNOME_MODULE, argc, argv,
-			    GNOME_PARAM_GOPTION_CONTEXT, context,
-			    GNOME_PARAM_HUMAN_READABLE_NAME,
-			    _("Dictionary"),
-			    GNOME_PARAM_APP_DATADIR, conf_dirs->get_system_data_dir().c_str(),
-			    NULL);
-	bonobo_init(&argc, argv);
 #endif // #ifndef CONFIG_GNOME
 
 	const char *query_word = NULL;
@@ -2388,31 +2281,6 @@ int main(int argc,char **argv)
 		}
 	}
 #endif // #ifdef _WIN32
-#else // #ifndef CONFIG_GNOME
-	if (CmdLineOptions::get_newinstance() == FALSE) {
-		CORBA_Object factory;
-		CORBA_char id[] = "OAFIID:GNOME_Stardict_Factory";
-		factory = bonobo_activation_activate_from_id(id,
-			Bonobo_ACTIVATION_FLAG_EXISTING_ONLY,
-			NULL, NULL);
-
-		if (factory != NULL) {
-			/* there is an instance already running, so send
-			 * commands to it if needed
-			 */
-			stardict_handle_automation_cmdline (query_word);
-			/* and we're done */
-			return EXIT_SUCCESS;
-		}
-	}
-
-	/*
-	GnomeClient *client;
-	if ((client = gnome_master_client()) != NULL) {
-		g_signal_connect (client, "save_yourself", G_CALLBACK (save_yourself_cb), (gpointer) argv[0]);
-		g_signal_connect (client, "die", G_CALLBACK (client_die_cb), NULL);
-	}
-	*/
 #endif // #ifndef CONFIG_GNOME
 	if (! stardict_server_new()) {
 		exit(0);
