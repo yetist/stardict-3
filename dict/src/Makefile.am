@@ -43,16 +43,6 @@ CONFIG_FILE_MODULE =
 endif
 else
 CONFIG_FILE_MODULE = gconf_file.cpp gconf_file.h
-IDL_FILE = GNOME_Stardict.idl
-
-IDL_SOURCES = \
-	GNOME_Stardict-stubs.c			\
-	GNOME_Stardict-common.c			\
-	GNOME_Stardict-skels.c			\
-	GNOME_Stardict.h		
-
-STARIDCT_APP_SERVER = \
-	stardict-application-server.cpp stardict-application-server.h
 endif
 
 stardict_built_sources = stardict-dbus-generated.h stardict-dbus-generated.c
@@ -64,7 +54,6 @@ HOTKEY_FILE_MODULE = eggaccelerators.cpp eggaccelerators.h tomboykeybinder.cpp t
 endif
 
 stardict_SOURCES = 			                \
-	$(IDL_SOURCES)			                \
 	$(STARIDCT_APP_SERVER)                  \
 	iskeyspressed.h            \
 	stardict.cpp stardict.h			        \
@@ -108,15 +97,6 @@ $(stardict_built_sources) : Makefile.am $(srcdir)/org.stardict.xml
 		--generate-c-code stardict-dbus-generated \
 		$(srcdir)/org.stardict.xml
 
-if GNOME_SUPPORT
-$(IDL_SOURCES): $(IDL_FILE)
-	$(ORBIT_IDL) -I $(LIBBONOBO_IDL) -I $(BONOBO_ACTIVATION_IDL) $^
+EXTRA_DIST = org.stardict.xml
 
-idl_DATA = $(IDL_FILE)
-idldir = $(datadir)/idl
-
-EXTRA_DIST = 		\
-	$(IDL_FILE)
-
-CLEANFILES = $(IDL_SOURCES)
-endif
+CLEANFILES = $(stardict_built_sources)

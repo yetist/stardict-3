@@ -13,11 +13,6 @@ schemasdir	 = @GCONF_SCHEMA_FILE_DIR@
 schemas_in_files = stardict.schemas.in
 schemas_DATA 	 = $(schemas_in_files:.schemas.in=.schemas)
 @INTLTOOL_SCHEMAS_RULE@
-
-serverdir = $(libdir)/bonobo/servers
-server_in_files = GNOME_Stardict.server.in
-server_DATA = $(server_in_files:.server.in=.server)
-@INTLTOOL_SERVER_RULE@
 endif
 
 man_MANS = stardict.1
@@ -25,7 +20,6 @@ man_MANS = stardict.1
 if GNOME_SUPPORT
 EXTRA_DIST = $(desktop_in_files)	\
 	$(appdata_in_files)		\
-	$(server_in_files)		\
 	$(schemas_in_files)		\
 	$(man_MANS)
 else
