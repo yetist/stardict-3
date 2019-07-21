@@ -18,8 +18,8 @@ REQUIRED_AUTOMAKE_VERSION=1.9
 }
 
 
-which gnome-autogen.sh || {
-    echo "You need to install gnome-common package"
+which mate-autogen || {
+    echo "You need to install mate-common package"
     exit 1
 }
-USE_GNOME2_MACROS=1 NOCONFIGURE=yes . gnome-autogen.sh "$@"
+USE_GNOME2_MACROS=1 NOCONFIGURE=yes . mate-autogen "$@"
