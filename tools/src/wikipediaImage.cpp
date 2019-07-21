@@ -25,6 +25,10 @@
 #define CONN_PASS "123"
 #define CONN_DB   "wikidb"
 
+/* MariaDB >= 10.2 client does not set MYSQL_PORT */
+#ifndef MYSQL_PORT
+#  define MYSQL_PORT 3306
+#endif
 
 void dump_file()
 {
