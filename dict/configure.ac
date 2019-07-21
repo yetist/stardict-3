@@ -52,7 +52,7 @@ AC_ARG_ENABLE([spell],
 	[enable_enchant=yes])
 
 if test "x$enable_enchant" = "xyes" ; then
-	PKG_CHECK_MODULES(ENCHANT, enchant >= $ENCHANT_REQUIRED, \
+	PKG_CHECK_MODULES(ENCHANT, enchant-2 >= $ENCHANT_REQUIRED, \
 			have_enchant=yes, have_enchant=no)
 	if test "x$have_enchant" = "xyes"; then
 		ENCHANT_CFLAGS="${ENCHANT_CFLAGS}"
@@ -400,7 +400,6 @@ elif test "x${enable_maemo_support}" = "xyes" ; then
         	AC_MSG_ERROR([gconftool-2 executable not found in your path - should be installed with GConf])
 	fi
 	AM_CONDITIONAL(GCONF_SCHEMAS_INSTALL, test "x${enable_maemo_support}" != "xno")
-	AM_GCONF_SOURCE_2
 elif test "x${enable_darwin_support}" = "xyes" ; then
         echo "Enable darwin suppport";
 	AC_DEFINE([CONFIG_DARWIN],[], [Compile with darwin support])
@@ -422,7 +421,6 @@ dnl *********************************************
 	if test x"$GCONFTOOL" = xno; then
         	AC_MSG_ERROR([gconftool-2 executable not found in your path - should be installed with GConf])
 	fi
-	AM_GCONF_SOURCE_2
 
 dnl ==========================================================================
 dnl stuff for the CORBA interface
