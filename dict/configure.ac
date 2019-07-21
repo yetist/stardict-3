@@ -145,7 +145,7 @@ if test "x$enable_flite" = "xyes" ; then
 	dnl flite.h, it must be in include path
 	AC_CHECK_HEADERS([flite/flite.h],
 		[
-			FLITE_LIBS="-lflite_cmu_us_kal -lflite_cmu_us_kal16 -lflite_cmu_us_rms -lflite_cmu_time_awb -lflite_cmu_us_slt -lflite_cmu_us_awb -lflite_usenglish -lflite_cmulex -lflite -lm"
+			FLITE_LIBS="-lflite_cmu_us_kal16 -lflite_cmu_us_slt -lflite_usenglish -lflite_cmulex -lflite -lm"
 			FLITE_CFLAGS=""
 			FLITE_PLUGIN_DIR="stardict-flite-tts-plugin"
 		],
