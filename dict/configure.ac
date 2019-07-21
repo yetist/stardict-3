@@ -355,6 +355,9 @@ else
 fi
 AC_SUBST(WIKI_PARSEDATA_PLUGIN_DIR)
 
+GMODULE2_LIBS=`pkg-config --libs gmodule-2.0`
+AC_SUBST([GMODULE2_LIBS])
+
 dnl ================================================================
 dnl main program checks.
 dnl ================================================================

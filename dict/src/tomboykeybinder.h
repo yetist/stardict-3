@@ -21,7 +21,6 @@
 #ifndef __TOMBOY_KEY_BINDER_H__
 #define __TOMBOY_KEY_BINDER_H__
 
-#include <glib.h>
 
 G_BEGIN_DECLS
 
