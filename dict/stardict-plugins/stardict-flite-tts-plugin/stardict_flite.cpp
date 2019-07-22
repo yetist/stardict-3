@@ -27,12 +27,24 @@ static IAppDirs* gpAppDirs = NULL;
 #include <flite/flite.h>
 
 extern "C" {
+#ifdef ENABLE_FLITE_CMU_US_KAL
 	cst_voice *register_cmu_us_kal(const char *voxdir);
+#endif
+#ifdef ENABLE_FLITE_CMU_TIME_AWB
 	cst_voice *register_cmu_time_awb(const char *voxdir);
+#endif
+#ifdef ENABLE_FLITE_CMU_US_KAL16
 	cst_voice *register_cmu_us_kal16(const char *voxdir);
+#endif
+#ifdef ENABLE_FLITE_CMU_US_AWB
 	cst_voice *register_cmu_us_awb(const char *voxdir);
+#endif
+#ifdef ENABLE_FLITE_CMU_US_RMS
 	cst_voice *register_cmu_us_rms(const char *voxdir);
+#endif
+#ifdef ENABLE_FLITE_CMU_US_SLT
 	cst_voice *register_cmu_us_slt(const char *voxdir);
+#endif
 }
 
 
@@ -188,12 +200,24 @@ bool stardict_tts_plugin_init(StarDictTtsPlugInObject *obj)
 {
 	flite_init();
 
+#ifdef ENABLE_FLITE_CMU_US_KAL
 	register_cmu_us_kal(NULL);
+#endif
+#ifdef ENABLE_FLITE_CMU_TIME_AWB
 	register_cmu_time_awb(NULL);
+#endif
+#ifdef ENABLE_FLITE_CMU_US_KAL16
 	register_cmu_us_kal16(NULL);
+#endif
+#ifdef ENABLE_FLITE_CMU_US_AWB
 	register_cmu_us_awb(NULL);
+#endif
+#ifdef ENABLE_FLITE_CMU_US_RMS
 	register_cmu_us_rms(NULL);
+#endif
+#ifdef ENABLE_FLITE_CMU_US_SLT
 	register_cmu_us_slt(NULL);
+#endif
 
 	std::string res = get_cfg_filename();
 	if (!g_file_test(res.c_str(), G_FILE_TEST_EXISTS)) {
