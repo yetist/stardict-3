@@ -17,6 +17,9 @@
  * along with StarDict.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "stardict_flite.h"
 #include <glib/gi18n.h>
 
@@ -135,12 +138,24 @@ static void configure()
 	gtk_box_pack_start(GTK_BOX(hbox), label, false, false, 0);
 	GtkWidget *combobox = gtk_combo_box_text_new();
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), _("Default"));
+#ifdef ENABLE_FLITE_CMU_US_KAL
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "kal");
+#endif
+#ifdef ENABLE_FLITE_CMU_TIME_AWB
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "awb_time");
+#endif
+#ifdef ENABLE_FLITE_CMU_US_KAL16
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "kal16");
+#endif
+#ifdef ENABLE_FLITE_CMU_US_AWB
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "awb");
+#endif
+#ifdef ENABLE_FLITE_CMU_US_RMS
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "rms");
+#endif
+#ifdef ENABLE_FLITE_CMU_US_SLT
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "slt");
+#endif
 	gint old_index;
 	if (voice_engine == "kal")
 		old_index = 1;
