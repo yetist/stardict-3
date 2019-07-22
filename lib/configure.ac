@@ -9,6 +9,9 @@ AM_INIT_AUTOMAKE([tar-ustar dist-bzip2])
 AC_CONFIG_HEADERS([config.h])
 AH_BOTTOM([#include <config-custom.h>])
 
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+AM_MAINTAINER_MODE
+
 AC_CONFIG_MACRO_DIR([m4])
 LT_INIT
 

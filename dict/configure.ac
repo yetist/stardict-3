@@ -6,6 +6,8 @@ AC_INIT([StarDict], 4.0.0, [http://stardict-4.sourceforge.net])
 AC_CONFIG_SRCDIR(src/stardict.cpp)
 AC_CONFIG_AUX_DIR([.])
 AM_INIT_AUTOMAKE([1.9 tar-ustar dist-bzip2])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+AM_MAINTAINER_MODE
 
 AC_CONFIG_HEADERS([config.h])
 AH_BOTTOM([#include <../lib/config-custom.h>])
