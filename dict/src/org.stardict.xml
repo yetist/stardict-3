@@ -1,0 +1,10 @@
+<node>
+  <interface name="org.stardict.Server">
+    <method name="GrabFocus"></method>
+    <method name="Hide"></method>
+    <method name="Quit"></method>
+    <method name="QueryWord">
+      <arg type="s" name="word" direction="in" />
+    </method>
+  </interface>
+</node>
