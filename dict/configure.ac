@@ -145,21 +145,38 @@ AC_ARG_ENABLE([flite],
 
 if test "x$enable_flite" = "xyes" ; then
 	dnl flite.h, it must be in include path
-	AC_CHECK_HEADERS([flite/flite.h],
-		[
-			FLITE_LIBS="-lflite_cmu_us_kal16 -lflite_cmu_us_slt -lflite_usenglish -lflite_cmulex -lflite -lm"
-			FLITE_CFLAGS=""
-			FLITE_PLUGIN_DIR="stardict-flite-tts-plugin"
-		],
-		[
-			AC_MSG_ERROR([Flite library not found. Use --disable-flite to build without flite plugin.])
-		],
-		[]
-	)
+        AC_CHECK_HEADERS([flite/flite.h], [have_flite_header=yes], [have_flite_header=no])
+        AC_CHECK_PROG(FLITE, [flite], [flite], [false])
+
+        FLITE_LIBS=
+        FLITE_CFLAGS=""
+        FLITE_PLUGIN_DIR="stardict-flite-tts-plugin"
+        AS_IF([test "x$have_flite_header" == "xyes" -a "x$FLITE" == "xflite" ],
+              [
+               FLITE_LIBS="$FLITE_LIBS -lflite_cmulex -lflite_usenglish -lflite -lm"
+               VOICES=`$FLITE -lv|$AWK -F: '{print $2}'`
+               for voice in $VOICES; do
+                       FLITE_LIBS="$FLITE_LIBS -lflite_cmu_us_$voice"
+                       voice_lib_name="flite_cmu_us_$voice"
+                       VOICE_LIB_NAME=`echo $voice_lib_name | tr "[a-z]" "[A-Z]"`
+                       ENABLE_VOICE_LIB_NAME="ENABLE_$VOICE_LIB_NAME"
+
+                       if ! grep ${ENABLE_VOICE_LIB_NAME} config.h.in;then
+                               echo "" >> config.h.in
+                               echo "/* Define whether $voice_lib_name is enabled. */" >> config.h.in
+                               echo "#undef ${ENABLE_VOICE_LIB_NAME} 1" >> config.h.in
+                       fi
+                       echo "#define ${ENABLE_VOICE_LIB_NAME} 1" >> confdefs.h
+               done
+              ],
+              [
+               AC_MSG_ERROR([Flite library not found. Use --disable-flite to build without flite plugin.])
+              ]
+       )
 else
-	FLITE_CFLAGS=
-	FLITE_LIBS=
-	FLITE_PLUGIN_DIR=
+        FLITE_CFLAGS=
+        FLITE_LIBS=
+        FLITE_PLUGIN_DIR=
 fi
 
 AC_SUBST(FLITE_CFLAGS)
